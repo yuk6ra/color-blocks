@@ -11,7 +11,7 @@ import "hardhat/console.sol";
 import { Base64 } from "./libraries/Base64.sol";
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
-contract DotSquiggle is ERC721URIStorage, Ownable {
+contract ColorBlocks is ERC721URIStorage, Ownable {
     using Strings for uint256;
     using Counters for Counters.Counter;
 

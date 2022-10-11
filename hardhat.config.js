@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
+require("hardhat-gas-reporter");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -9,5 +10,12 @@ module.exports = {
       url: process.env.STAGING_ALCHEMY_KEY,
       accounts: [process.env.PRIVATE_KEY],
     }
+  },
+  gasReporter: {
+    enabled: true,
+    outputFile: "gas-report.txt",
+    currency: "ETH",
+    gasPrice: 23,
+    noColors: false,
   }
 };
