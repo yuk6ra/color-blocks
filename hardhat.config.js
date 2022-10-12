@@ -13,7 +13,7 @@ module.exports = {
   },
   gasReporter: {
     enabled: true,
-    outputFile: "gas-report.txt",
+    outputFile: "gas-report.ans",
     currency: "ETH",
     gasPrice: 23,
     noColors: false,

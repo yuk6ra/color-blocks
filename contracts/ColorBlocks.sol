@@ -7,20 +7,21 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "hardhat/console.sol";
-
 import { Base64 } from "./libraries/Base64.sol";
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
 contract ColorBlocks is ERC721URIStorage, Ownable {
+
+    // uint256 => string
     using Strings for uint256;
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIds;
 
-    string public description = "NFT";
+    string public description ;
 
     constructor() ERC721("Dot Squiggle", "DOTSQUIGGLE") {
-        console.log("THis is NFT.");
+        console.log("This is NFT");
     }
 
 
@@ -66,15 +67,20 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         } else {
             image = _generateBlock(tokenId, dango);
         }
+
+        image = _generateBlock(tokenId, ao);
+        
         return abi.encodePacked(image);
     }
 
-    function _generateRGB(uint256 seed) internal pure returns(string memory) {
+    function _generateRGB(uint256 tokenId, uint256 seed) internal pure returns(string memory) {
+        uint256 seed = _random(seed);
         uint256[3] memory rgb;
         for (uint256 i = 0 ; i < 3; i++) {
             rgb[i] = _random(seed) % 256;
             seed = _random(seed);
         }
+
         return string(abi.encodePacked('rgb(', rgb[0].toString(), ',', rgb[1].toString(), ',', rgb[2].toString(), ')'));
     }
 
@@ -84,9 +90,12 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         uint256 color_len = 9;
         uint256 color_pos;
         uint256 seed = _random(tokenId) % 9;
+
         string[7] memory colors;
 
-        string memory rgb = _generateRGB(seed); // 一層目
+        string[9] memory _color = color;
+
+        string memory rgb = _generateRGB(tokenId, seed);
         
         colors[0] = rgb;
 
@@ -94,10 +103,10 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
             color_pos = seed + i - reset;
             
             if (color_pos < color_len){
-                colors[i] = color[color_pos];                
+                colors[i] = _color[color_pos];                
 
             } else if (color_pos == color_len){
-                colors[i] = color[0];
+                colors[i] = _color[0];
                 seed = 0;
                 reset = i;
             }
@@ -109,21 +118,19 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
     function _generateBlock(uint256 tokenId, string[9] memory color) internal pure returns(bytes memory) {
         uint256 length = 7;
         uint256 center = 16;
-        uint256 pos;
+        uint256 pos = 0;
 
         string[7] memory colors = _generateColor(tokenId, color);
 
-        bytes memory pack;
-
+        bytes memory pack = abi.encodePacked('<svg width="1024" height="1024" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">');
+        
         for (uint256 i = 0; i < length; i++){
             pos = center - i*2;
-            if (i==0){
-                pack = abi.encodePacked('<svg width="1024" height="1024" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">');
-            }
-            pack = abi.encodePacked(pack, '<>'
+            pack = abi.encodePacked(pack,
                 '<path fill="',colors[i],'" d="m16,',pos.toString(),' 3.46 2v4L16 ',(pos+8).toString(),'l-3.46-2v-4z"/>'
             );
         }
+
         pack = abi.encodePacked(pack, '</svg>');
 
         return pack;
@@ -137,15 +144,16 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         console.log(dataURI(newItemId));
 
         _safeMint(msg.sender, newItemId);
-
-        _setTokenURI(newItemId, dataURI(newItemId));
-
         _tokenIds.increment();
         return newItemId;
     }
 
     function setDescription(string memory _description) external onlyOwner {
         description = _description;
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        return dataURI(tokenId);
     }
 
 }
