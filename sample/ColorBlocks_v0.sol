@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: NOLICENSE
 // CC0 NFT Project
-// Only Random 0 ~ 255 RGB
 
 pragma solidity ^0.8.9;
 
@@ -70,11 +69,13 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
     function _generateRGB(uint256 seed) internal pure returns (uint256[3] memory) {
         uint256[3] memory rgb;
 
+        // ランダム
         for (uint256 i = 0 ; i < 3; i++) {
             rgb[i] = seed % 256;
             seed = _getNumber(seed);
         }
 
+        // return string(abi.encodePacked('rgb(', rgb[0].toString(), ',', rgb[1].toString(), ',', rgb[2].toString(), ')'));
         return rgb;
     } 
 
@@ -93,11 +94,8 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         string[5] memory colors;
         uint256[3] memory end = _generateRGB(seed);
         uint256[3] memory first = _generateRGB(seed / 10000);
-        uint256[5] memory value;
         
         colors[0] = string(abi.encodePacked('<path fill="rgb(',first[0].toString(), ',', first[1].toString(), ',', first[2].toString(),')" '));
-
-        // string(abi.encodePacked('{"display_type": "number", "trait_type": "Color 1 B", "value": 2}'));
 
         for (uint256 i = 1; i < 4; i++) {
             colors[i] = string(abi.encodePacked(
@@ -118,34 +116,27 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         uint256 length = 7;
         uint256 color_len = _getNumberOfColors(seed); //色の層の厚さを決める
 
+        string[5] memory colors = _generateColors(tokenId, seed);
+        // string[5] memory colors = _generateGrad(seed);
+
         bytes memory pack = abi.encodePacked('<svg width="1024" height="1024" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">');
 
-        string[5] memory colors = _generateColors(tokenId, seed);
-
-        if (seed % 5 == 0) {
-            pack = abi.encodePacked(
-                pack, 
-                colors[0], 'd="m16,19 3.46 2v3L16 26l-3.46-2v-3z"/>',
-                colors[0], 'd="m16,16 3.46 2v3L16 23l-3.46-2v-3z"/>',
-                colors[1], 'd="m16,13 3.46 2v3L16 20l-3.46-2v-3z"/>',
-                colors[1], 'd="m16,10 3.46 2v3L16 17l-3.46-2v-3z"/>'
-            );
-        } else if (seed % 5 == 1) {
+        if (seed % 3 == 1) {
             pack = abi.encodePacked(
                 pack, 
                 colors[0], 'd="m16,19 3.46 2v3L16 26l-3.46-2v-3z"/>',
                 colors[1], 'd="m16,16 3.46 2v3L16 23l-3.46-2v-3z"/>',
                 colors[2], 'd="m16,13 3.46 2v3L16 20l-3.46-2v-3z"/>'
-            );
-        } else if (seed % 5 == 2) {
+                );
+        } else if (seed % 3 == 2) {
             pack = abi.encodePacked(
                 pack, 
                 colors[0], 'd="m16,19 3.46 2v3L16 26l-3.46-2v-3z"/>',
                 colors[1], 'd="m16,16 3.46 2v3L16 23l-3.46-2v-3z"/>',
                 colors[2], 'd="m16,13 3.46 2v3L16 20l-3.46-2v-3z"/>',
                 colors[3], 'd="m16,10 3.46 2v3L16 17l-3.46-2v-3z"/>'
-            );
-        } else if (seed % 5 == 3) {
+                );
+        } else if (seed % 3 == 3) {
             pack = abi.encodePacked(
                 pack, 
                 colors[0], 'd="m16,19 3.46 2v3L16 26l-3.46-2v-3z"/>',
@@ -153,11 +144,24 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
                 colors[2], 'd="m16,13 3.46 2v3L16 20l-3.46-2v-3z"/>',
                 colors[3], 'd="m16,10 3.46 2v3L16 17l-3.46-2v-3z"/>',
                 colors[4], 'd="m16,7 3.46 2v3L16 14l-3.46-2v-3z"/>'
-            );
+                );
         }
-        
+        // pack = abi.encodePacked(pack, colors[3], 'd="m16,10 3.46 2v3L16 17l-3.46-2v-3z"/>');
+        // seed = _getNumber(seed);
+        // pack = abi.encodePacked(pack, colors[4], 'd="m16,7 3.46 2v3L16 14l-3.46-2v-3z"/>');
         pack = abi.encodePacked(pack, '</svg>');
-
+        // } else {
+        // pack = abi.encodePacked(pack, colors[0], 'd="m16,19 3.46 2v3L16 26l-3.46-2v-3z"/>');
+        // seed = _getNumber(seed);
+        // pack = abi.encodePacked(pack, colors[1], 'd="m16,16 3.46 2v3L16 23l-3.46-2v-3z"/>');
+        // seed = _getNumber(seed);
+        // pack = abi.encodePacked(pack, colors[2], 'd="m16,13 3.46 2v3L16 20l-3.46-2v-3z"/>');
+        // seed = _getNumber(seed);
+        // pack = abi.encodePacked(pack, colors[3], 'd="m16,10 3.46 2v3L16 17l-3.46-2v-3z"/>');
+        // seed = _getNumber(seed);
+        // pack = abi.encodePacked(pack, colors[4], 'd="m16,7 3.46 2v3L16 14l-3.46-2v-3z"/>');
+        // pack = abi.encodePacked(pack, '</svg>');
+        // }
         return pack;
     }
 

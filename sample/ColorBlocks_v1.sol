@@ -97,8 +97,6 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         
         colors[0] = string(abi.encodePacked('<path fill="rgb(',first[0].toString(), ',', first[1].toString(), ',', first[2].toString(),')" '));
 
-        // string(abi.encodePacked('{"display_type": "number", "trait_type": "Color 1 B", "value": 2}'));
-
         for (uint256 i = 1; i < 4; i++) {
             colors[i] = string(abi.encodePacked(
                 '<path fill="rgb(',

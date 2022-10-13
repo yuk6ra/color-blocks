@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: NOLICENSE
 // CC0 NFT Project
-// Only Random 0 ~ 255 RGB
+// Using hex * 16
 
 pragma solidity ^0.8.9;
 
@@ -19,6 +19,11 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
 
     Counters.Counter private _tokenIds;
 
+    string[] private hexColors = {
+        "00", "0F", "1F", "2F", "3F", "4F", "5F", "6F", "7F", "8F", "9F"
+        "AF", "BF", "CF", "DF", "EF", "FF"
+    }
+
     string public description;
 
     constructor() ERC721("Dot Squiggle", "DOTSQUIGGLE") {
@@ -30,12 +35,16 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
     }
 
 
-    function dataURI(uint256 tokenId) public view returns(string memory){
+    function dataURI(uint256 tokenId, string memory attributes) public view returns(string memory){
         string memory stringTokenId = tokenId.toString();
 
         string memory name = string(
             abi.encodePacked('Dot Squiggle #', stringTokenId)
         );
+
+        string memory attributes = string(
+            abi.encodePacked('[',_generateProp(),']') 
+        )
         
         string memory image = Base64.encode(_generateBlock(tokenId));
 
@@ -45,6 +54,7 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
                 '{"name":"', name,
                 '", "description": "', description,
                 '", "image" : "data:image/svg+xml;base64,', image,
+                '", "attributes":' attributes,
                 '"}'
             )))
             )
@@ -63,27 +73,34 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         return uint256(seed % 4 + 2);
     }
 
-    /**
-     * @notice RGBのカラーを生み出す
-     * @dev あとでRGBを16進数変換する
-     */
-    function _generateRGB(uint256 seed) internal pure returns (uint256[3] memory) {
+    function _getRGB(uint256 seed) internal pure returns (uint256[3] memory) {
         uint256[3] memory rgb;
 
         for (uint256 i = 0 ; i < 3; i++) {
-            rgb[i] = seed % 256;
+            rgb[i] = seed % hexColors.length;
             seed = _getNumber(seed);
         }
 
         return rgb;
     } 
-
     function _generateColors(uint256 tokenId, uint256 seed) internal pure returns(string[5] memory) {        
         string[5] memory colors;
+        uint[5] memory rgbProp;
+        string[5] memory hexProp;
+
+        string[] memory parts;
+        part[0] = '{"display_type": "number", "trait_type": "Color ';
+        part[1] = ', "value":';
+        part[2] = '}';
+
+        // string(abi.encodePacked('{"display_type": "number", "trait_type": "Color 1 B", "value": 2}'));
+        // string(abi.encodePacked('{"trait_type": "Color 1", "value": "#AAAAAA"}'));
 
         for (uint256 i = 0 ; i < 5; i++) {
-            uint256[3] memory rgb =  _generateRGB(seed);
-            colors[i] = string(abi.encodePacked('<path fill="rgb(',rgb[0].toString(), ',', rgb[1].toString(), ',', rgb[2].toString(),')" '));
+            uint256[3] memory rgb =  _getRGB(seed);
+            hexProp[i] = string(abi.encodePacked(hexColors(rgb[0]), hexColors(rgb[2]), hexColors(rgb[3])))
+            
+            colors[i] = string(abi.encodePacked('<path fill="#', hexProp[i],')" '));
             seed = _getNumber(seed);
         }
         return colors;
@@ -96,8 +113,6 @@ contract ColorBlocks is ERC721URIStorage, Ownable {
         uint256[5] memory value;
         
         colors[0] = string(abi.encodePacked('<path fill="rgb(',first[0].toString(), ',', first[1].toString(), ',', first[2].toString(),')" '));
-
-        // string(abi.encodePacked('{"display_type": "number", "trait_type": "Color 1 B", "value": 2}'));
 
         for (uint256 i = 1; i < 4; i++) {
             colors[i] = string(abi.encodePacked(

@@ -6,7 +6,7 @@ const main = async () => {
 
 
   let i = 0;
-  for (i=0; i<10; i++){
+  for (i=0; i<20; i++){
     let txn = await nftContract.mintNFT();
     await txn.wait();
     console.log("%d 回目", i);
